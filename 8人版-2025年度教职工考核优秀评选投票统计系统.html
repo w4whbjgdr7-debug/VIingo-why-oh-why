@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外国语学院教职工考核优秀评选投票统计系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入SheetJS库用于Excel导出 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4a6fa5, #2c4d80);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        h1 i {
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle-small {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 600px;
+        }
+        
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            border-right: 1px solid #eaeef2;
+            background-color: #fafbfd;
+        }
+        
+        .right-panel {
+            flex: 1.5;
+            min-width: 300px;
+            padding: 25px;
+            background-color: white;
+        }
+        
+        .panel-title {
+            font-size: 20px;
+            color: #2c4d80;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeef2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: #4a6fa5;
+        }
+        
+        .add-candidate-form {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="text"], input[type="number"], select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #d0d7e2;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            min-width: 200px;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: #4a6fa5;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a5a8a;
+        }
+        
+        .btn-secondary {
+            background-color: #f0f4f8;
+            color: #4a6fa5;
+            border: 1px solid #d0d7e2;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #0da271;
+        }
+        
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .candidates-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #eaeef2;
+            margin-bottom: 20px;
+        }
+        
+        .candidate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eaeef2;
+            transition: background-color 0.2s;
+        }
+        
+        .candidate-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .candidate-item:last-child {
+            border-bottom: none;
+        }
+        
+        .candidate-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .candidate-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .candidate-details {
+            font-size: 14px;
+            color: #64748b;
+            margin-left: 10px;
+        }
+        
+        .vote-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .vote-btn {
+            background-color: #e9f2ff;
+            color: #4a6fa5;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .vote-btn:hover {
+            background-color: #4a6fa5;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .vote-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .vote-count-display {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c4d80;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .remove-vote-btn {
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-vote-btn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .results-table th {
+            background-color: #f0f4f8;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c4d80;
+            border-bottom: 2px solid #eaeef2;
+        }
+        
+        .results-table td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #eaeef2;
+        }
+        
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .results-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .rank-1 {
+            background-color: #ffd700;
+            color: #8a6d00;
+        }
+        
+        .rank-2 {
+            background-color: #c0c0c0;
+            color: #4a4a4a;
+        }
+        
+        .rank-3 {
+            background-color: #cd7f32;
+            color: #5a3c1e;
+        }
+        
+        .rank-other {
+            background-color: #f0f4f8;
+            color: #4a6fa5;
+        }
+        
+        .votes-count {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c4d80;
+        }
+        
+        /* 百分比条形图样式 */
+        .percentage-bar-container {
+            margin-top: 8px;
+        }
+        
+        .percentage-bar {
+            height: 24px;
+            background-color: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .percentage-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.8s ease;
+            position: relative;
+            background: linear-gradient(90deg, #4a6fa5, #2c4d80);
+        }
+        
+        .percentage-text {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c4d80;
+            z-index: 2;
+        }
+        
+        .percentage-number {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            z-index: 2;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #eaeef2;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c4d80;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .vote-distribution {
+            width: 100%;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #eaeef2;
+        }
+        
+        .distribution-title {
+            font-size: 18px;
+            color: #2c4d80;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 14px;
+            border-top: 1px solid #eaeef2;
+            background-color: #fafbfd;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid #eaeef2;
+            }
+            
+            .add-candidate-form {
+                flex-direction: column;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+        }
+        
+        /* 颜色根据百分比变化 */
+        .percentage-90-100 { background: linear-gradient(90deg, #10b981, #059669); }
+        .percentage-70-90 { background: linear-gradient(90deg, #34d399, #10b981); }
+        .percentage-50-70 { background: linear-gradient(90deg, #4a6fa5, #2c4d80); }
+        .percentage-30-50 { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+        .percentage-10-30 { background: linear-gradient(90deg, #93c5fd, #60a5fa); }
+        .percentage-0-10 { background: linear-gradient(90deg, #bfdbfe, #93c5fd); }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eaeef2;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #4a6fa5;
+            border-bottom: 3px solid #4a6fa5;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .candidate-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-add-container {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #eaeef2;
+        }
+        
+        .batch-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d0d7e2;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .batch-textarea:focus {
+            outline: none;
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+        
+        .batch-hint {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .result-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .winner-badge {
+            display: inline-block;
+            background-color: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .danger-zone {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .danger-title {
+            color: #dc2626;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .vote-history {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #eaeef2;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eaeef2;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-time {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .history-action {
+            font-weight: 600;
+            color: #4a6fa5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-poll"></i> 外国语学院基础英语教研室、应用英语教研室<br>2025年度教职工考核优秀评选投票统计系统</h1>
+            <p class="subtitle">教职工考核优秀评选 - 投票统计与结果分析</p>
+            <p class="subtitle-small">应选8人 | 实时统计 | 自动排名 | 数据导出</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="vote">投票与结果</div>
+            <div class="tab" data-tab="export">数据导出</div>
+        </div>
+        
+        <div class="content">
+            <!-- 左侧面板：投票管理 -->
+            <div class="left-panel">
+                <div class="tab-content active" id="vote-tab">
+                    <h2 class="panel-title"><i class="fas fa-user-plus"></i> 候选人管理</h2>
+                    
+                    <div class="add-candidate-form">
+                        <input type="text" id="candidateInput" placeholder="请输入候选人姓名">
+                        <select id="candidateDept">
+                            <option value="">请选择教研室</option>
+                            <option value="基础英语教研室">基础英语教研室</option>
+                            <option value="应用英语教研室">应用英语教研室</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <button class="btn btn-primary" id="addCandidateBtn">
+                            <i class="fas fa-plus"></i> 添加候选人
+                        </button>
+                    </div>
+                    
+                    <div class="batch-add-container">
+                        <h3><i class="fas fa-users"></i> 批量添加候选人</h3>
+                        <textarea class="batch-textarea" id="batchCandidateInput" placeholder="请输入候选人姓名，每行一个。可添加格式：姓名（教研室），如：张三（基础英语教研室）"></textarea>
+                        <div class="batch-hint">每行一个候选人，可直接输入姓名，或使用"姓名（教研室）"格式</div>
+                        <button class="btn btn-secondary btn-sm" id="batchAddBtn">
+                            <i class="fas fa-user-friends"></i> 批量添加
+                        </button>
+                    </div>
+                    
+                    <div class="candidate-filters">
+                        <select id="filterDept" class="btn-secondary">
+                            <option value="">全部教研室</option>
+                            <option value="基础英语教研室">基础英语教研室</option>
+                            <option value="应用英语教研室">应用英语教研室</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <input type="text" id="searchCandidate" placeholder="搜索候选人..." class="btn-secondary">
+                        <button class="btn btn-secondary btn-sm" id="clearFilters">
+                            <i class="fas fa-times"></i> 清除筛选
+                        </button>
+                    </div>
+                    
+                    <div class="panel-title"><i class="fas fa-users"></i> 候选人列表（点击投票）</div>
+                    
+                    <div class="candidates-list" id="candidatesList">
+                        <!-- 候选人列表将在这里动态生成 -->
+                        <div class="empty-state" id="emptyList">
+                            <i class="fas fa-user-friends"></i>
+                            <p>暂无候选人，请先添加候选人</p>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-secondary" id="resetAllBtn">
+                            <i class="fas fa-redo"></i> 重置所有票数
+                        </button>
+                        <button class="btn btn-danger" id="clearAllBtn">
+                            <i class="fas fa-trash"></i> 清空所有候选人
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="export-tab">
+                    <h2 class="panel-title"><i class="fas fa-file-export"></i> 数据导出</h2>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="exportCandidates">0</div>
+                            <div class="stat-label">待导出候选人</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="exportVotes">0</div>
+                            <div class="stat-label">待导出票数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="exportTime">-</div>
+                            <div class="stat-label">最后导出时间</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">导出选项</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="includeRanking" checked> 包含排名
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="includePercentage" checked> 包含百分比
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="includeDept" checked> 包含教研室信息
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="includeTimestamp" checked> 包含时间戳
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-success" id="exportExcelBtn">
+                            <i class="fas fa-file-excel"></i> 导出Excel文件
+                        </button>
+                        <button class="btn btn-warning" id="exportSummaryBtn">
+                            <i class="fas fa-file-alt"></i> 导出文本摘要
+                        </button>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-secondary" id="exportDataBtn">
+                            <i class="fas fa-file-code"></i> 导出JSON数据
+                        </button>
+                        <button class="btn btn-secondary" id="importDataBtn">
+                            <i class="fas fa-file-import"></i> 导入数据
+                        </button>
+                        <input type="file" id="importFileInput" accept=".json,.xlsx,.xls,.csv" style="display: none;">
+                    </div>
+                    
+                    <div class="danger-zone">
+                        <div class="danger-title">
+                            <i class="fas fa-exclamation-triangle"></i> 危险操作
+                        </div>
+                        <p style="margin-bottom: 15px; color: #6b7280;">这些操作将永久删除数据，请谨慎操作</p>
+                        <button class="btn btn-danger" id="backupDataBtn">
+                            <i class="fas fa-save"></i> 备份数据
+                        </button>
+                        <button class="btn btn-danger" id="restoreDataBtn">
+                            <i class="fas fa-undo"></i> 恢复数据
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧面板：结果分析与导出 -->
+            <div class="right-panel">
+                <div class="tab-content active" id="vote-tab">
+                    <div class="result-actions">
+                        <h2 class="panel-title" style="margin-bottom: 0;"><i class="fas fa-chart-bar"></i> 实时投票结果</h2>
+                        <div class="search-box">
+                            <input type="text" id="searchResults" placeholder="搜索候选人结果..." style="width: 100%;">
+                        </div>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalCandidates">0</div>
+                            <div class="stat-label">候选人总数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalVotes">0</div>
+                            <div class="stat-label">总投票数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="leadingVotes">0</div>
+                            <div class="stat-label">最高票数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgVotes">0</div>
+                            <div class="stat-label">平均票数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="validVotes">0</div>
+                            <div class="stat-label">有效投票数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="participationRate">0%</div>
+                            <div class="stat-label">投票率</div>
+                        </div>
+                    </div>
+                    
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th width="10%">排名</th>
+                                <th width="30%">候选人</th>
+                                <th width="15%">得票数</th>
+                                <th width="25%">得票比例</th>
+                                <th width="20%">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- 投票结果将在这里动态生成 -->
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-poll"></i>
+                                        <p>暂无投票数据</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="vote-history">
+                        <div class="distribution-title">
+                            <i class="fas fa-history"></i> 最近投票记录
+                        </div>
+                        <div id="voteHistory">
+                            <div class="empty-state" style="padding: 20px;">
+                                <i class="fas fa-history"></i>
+                                <p>暂无投票记录</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="export-tab">
+                    <h2 class="panel-title"><i class="fas fa-chart-pie"></i> 投票分布图</h2>
+                    
+                    <div class="vote-distribution">
+                        <div id="distributionChart">
+                            <!-- 投票分布图将在这里动态生成 -->
+                            <div class="empty-state" id="emptyDistribution">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>暂无投票分布数据</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">系统信息</label>
+                        <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; font-size: 14px;">
+                            <p><strong>版本：</strong> 2.0.0</p>
+                            <p><strong>数据存储：</strong> <span id="storageStatus">本地存储</span></p>
+                            <p><strong>最后更新：</strong> <span id="lastUpdate">-</span></p>
+                            <p><strong>数据大小：</strong> <span id="dataSize">0 KB</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 外国语学院 - 本系统数据仅保存在浏览器本地，刷新页面不会丢失</p>
+            <p>说明：应选8人，排名前8位当选 | 系统版本 2.0.0</p>
+        </footer>
+    </div>
+
+    <script>
+        // 投票数据存储在本地
+        let candidates = JSON.parse(localStorage.getItem('voteCandidates')) || [];
+        let voteHistory = JSON.parse(localStorage.getItem('voteHistory')) || [];
+        let settings = JSON.parse(localStorage.getItem('voteSettings')) || {
+            maxVotesPerUser: 8,  // 修改为8人
+            lastExport: null,
+            lastBackup: null
+        };
+        
+        // 全局变量用于存储排序后的候选人和总票数
+        let sortedCandidatesGlobal = [];
+        let totalVotesGlobal = 0;
+        
+        // DOM元素
+        const candidateInput = document.getElementById('candidateInput');
+        const candidateDept = document.getElementById('candidateDept');
+        const addCandidateBtn = document.getElementById('addCandidateBtn');
+        const batchCandidateInput = document.getElementById('batchCandidateInput');
+        const batchAddBtn = document.getElementById('batchAddBtn');
+        const candidatesList = document.getElementById('candidatesList');
+        const emptyList = document.getElementById('emptyList');
+        const resultsBody = document.getElementById('resultsBody');
+        const totalCandidatesEl = document.getElementById('totalCandidates');
+        const totalVotesEl = document.getElementById('totalVotes');
+        const leadingVotesEl = document.getElementById('leadingVotes');
+        const avgVotesEl = document.getElementById('avgVotes');
+        const validVotesEl = document.getElementById('validVotes');
+        const participationRateEl = document.getElementById('participationRate');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const exportExcelBtn = document.getElementById('exportExcelBtn');
+        const exportSummaryBtn = document.getElementById('exportSummaryBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importDataBtn = document.getElementById('importDataBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const filterDept = document.getElementById('filterDept');
+        const searchCandidate = document.getElementById('searchCandidate');
+        const clearFilters = document.getElementById('clearFilters');
+        const searchResults = document.getElementById('searchResults');
+        const exportCandidatesEl = document.getElementById('exportCandidates');
+        const exportVotesEl = document.getElementById('exportVotes');
+        const exportTimeEl = document.getElementById('exportTime');
+        const voteHistoryEl = document.getElementById('voteHistory');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const storageStatusEl = document.getElementById('storageStatus');
+        const lastUpdateEl = document.getElementById('lastUpdate');
+        const dataSizeEl = document.getElementById('dataSize');
+        const backupDataBtn = document.getElementById('backupDataBtn');
+        const restoreDataBtn = document.getElementById('restoreDataBtn');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化选项卡
+            initTabs();
+            
+            renderCandidates();
+            updateResults();
+            updateExportInfo();
+            updateSystemInfo();
+            
+            // 如果没有任何候选人，显示空状态
+            if (candidates.length === 0) {
+                emptyList.style.display = 'block';
+            } else {
+                emptyList.style.display = 'none';
+            }
+            
+            // 初始化事件监听器
+            initEventListeners();
+        });
+        
+        // 初始化选项卡
+        function initTabs() {
+            // 设置选项卡切换
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // 更新活动选项卡
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // 显示对应内容
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                            
+                            // 如果切换到数据导出选项卡，更新内容
+                            if (tabId === 'export') {
+                                updateExportInfo();
+                                // 使用全局变量更新分布图
+                                updateDistributionChart(sortedCandidatesGlobal, totalVotesGlobal);
+                            }
+                        }
+                    });
+                });
+            });
+        }
+        
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 添加候选人
+            addCandidateBtn.addEventListener('click', addCandidate);
+            
+            // 批量添加候选人
+            batchAddBtn.addEventListener('click', batchAddCandidates);
+            
+            // 按回车键添加候选人
+            candidateInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addCandidate();
+                }
+            });
+            
+            // 筛选候选人
+            filterDept.addEventListener('change', renderCandidates);
+            searchCandidate.addEventListener('input', renderCandidates);
+            clearFilters.addEventListener('click', () => {
+                filterDept.value = '';
+                searchCandidate.value = '';
+                renderCandidates();
+            });
+            
+            // 筛选结果
+            searchResults.addEventListener('input', updateResults);
+            
+            // 重置所有票数
+            resetAllBtn.addEventListener('click', resetAllVotes);
+            
+            // 清空所有候选人
+            clearAllBtn.addEventListener('click', clearAllCandidates);
+            
+            // 导出Excel文件
+            exportExcelBtn.addEventListener('click', exportToExcel);
+            
+            // 导出文本摘要
+            exportSummaryBtn.addEventListener('click', exportToSummary);
+            
+            // 导出JSON数据
+            exportDataBtn.addEventListener('click', exportToJSON);
+            
+            // 导入数据
+            importDataBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+            
+            importFileInput.addEventListener('change', importData);
+            
+            // 备份数据
+            backupDataBtn.addEventListener('click', backupData);
+            
+            // 恢复数据
+            restoreDataBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+        }
+        
+        // 添加候选人
+        function addCandidate() {
+            const name = candidateInput.value.trim();
+            const dept = candidateDept.value;
+            
+            if (name === '') {
+                alert('请输入候选人姓名');
+                candidateInput.focus();
+                return;
+            }
+            
+            // 检查是否已存在
+            if (candidates.some(candidate => candidate.name === name)) {
+                alert('该候选人已存在');
+                candidateInput.value = '';
+                candidateInput.focus();
+                return;
+            }
+            
+            // 添加新候选人
+            candidates.push({
+                id: Date.now(),
+                name: name,
+                dept: dept || '未指定',
+                votes: 0,
+                addedDate: new Date().toISOString()
+            });
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+            
+            // 清空输入框
+            candidateInput.value = '';
+            candidateDept.value = '';
+            candidateInput.focus();
+            
+            // 更新界面
+            renderCandidates();
+            updateResults();
+            emptyList.style.display = 'none';
+            
+            // 记录操作
+            addVoteHistory(`添加候选人: ${name} (${dept || '未指定'})`);
+        }
+        
+        // 批量添加候选人
+        function batchAddCandidates() {
+            const batchText = batchCandidateInput.value.trim();
+            
+            if (batchText === '') {
+                alert('请输入候选人姓名');
+                batchCandidateInput.focus();
+                return;
+            }
+            
+            const lines = batchText.split('\n');
+            let addedCount = 0;
+            let duplicateCount = 0;
+            
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (trimmedLine === '') return;
+                
+                // 解析姓名和教研室（格式：姓名（教研室））
+                let name = trimmedLine;
+                let dept = '未指定';
+                
+                const deptMatch = trimmedLine.match(/(.+)\s*\((.+)\)/);
+                if (deptMatch) {
+                    name = deptMatch[1].trim();
+                    dept = deptMatch[2].trim();
+                }
+                
+                // 检查是否已存在
+                if (candidates.some(candidate => candidate.name === name)) {
+                    duplicateCount++;
+                    return;
+                }
+                
+                // 添加新候选人
+                candidates.push({
+                    id: Date.now() + Math.random(),
+                    name: name,
+                    dept: dept,
+                    votes: 0,
+                    addedDate: new Date().toISOString()
+                });
+                
+                addedCount++;
+            });
+            
+            if (addedCount > 0) {
+                // 保存到本地存储
+                saveToLocalStorage();
+                
+                // 更新界面
+                renderCandidates();
+                updateResults();
+                emptyList.style.display = 'none';
+                
+                // 记录操作
+                addVoteHistory(`批量添加 ${addedCount} 个候选人`);
+                
+                alert(`成功添加 ${addedCount} 个候选人${duplicateCount > 0 ? `，跳过 ${duplicateCount} 个重复候选人` : ''}`);
+            } else {
+                alert(`没有添加任何候选人${duplicateCount > 0 ? `，所有候选人已存在` : ''}`);
+            }
+            
+            // 清空输入框
+            batchCandidateInput.value = '';
+        }
+        
+        // 渲染候选人列表
+        function renderCandidates() {
+            candidatesList.innerHTML = '';
+            
+            const deptFilter = filterDept.value;
+            const searchFilter = searchCandidate.value.toLowerCase();
+            
+            let filteredCandidates = candidates;
+            
+            // 应用筛选
+            if (deptFilter) {
+                filteredCandidates = filteredCandidates.filter(candidate => candidate.dept === deptFilter);
+            }
+            
+            if (searchFilter) {
+                filteredCandidates = filteredCandidates.filter(candidate => 
+                    candidate.name.toLowerCase().includes(searchFilter)
+                );
+            }
+            
+            if (filteredCandidates.length === 0) {
+                emptyList.style.display = 'block';
+                return;
+            }
+            
+            emptyList.style.display = 'none';
+            
+            filteredCandidates.forEach(candidate => {
+                const candidateItem = document.createElement('div');
+                candidateItem.className = 'candidate-item';
+                candidateItem.setAttribute('data-id', candidate.id);
+                
+                candidateItem.innerHTML = `
+                    <div class="candidate-info">
+                        <div>
+                            <div class="candidate-name">${candidate.name}</div>
+                            <div class="candidate-details">${candidate.dept} • 当前票数: ${candidate.votes}</div>
+                        </div>
+                    </div>
+                    <div class="vote-controls">
+                        <div class="vote-count-display">${candidate.votes}</div>
+                        <button class="remove-vote-btn" data-id="${candidate.id}" title="减少一票">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="vote-btn" data-id="${candidate.id}" title="投票">
+                            <i class="fas fa-vote-yea"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // 添加投票事件
+                const voteBtn = candidateItem.querySelector('.vote-btn');
+                voteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    voteForCandidate(candidate.id);
+                });
+                
+                // 添加减少票数事件
+                const removeVoteBtn = candidateItem.querySelector('.remove-vote-btn');
+                removeVoteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeVoteFromCandidate(candidate.id);
+                });
+                
+                // 点击整个候选人项也可以投票
+                candidateItem.addEventListener('click', (e) => {
+                    if (e.target !== voteBtn && e.target !== removeVoteBtn && 
+                        !voteBtn.contains(e.target) && !removeVoteBtn.contains(e.target)) {
+                        voteForCandidate(candidate.id);
+                    }
+                });
+                
+                candidatesList.appendChild(candidateItem);
+            });
+        }
+        
+        // 为候选人投票
+        function voteForCandidate(id) {
+            const candidateIndex = candidates.findIndex(c => c.id === id);
+            
+            if (candidateIndex !== -1) {
+                candidates[candidateIndex].votes += 1;
+                saveToLocalStorage();
+                updateResults();
+                
+                // 记录投票历史
+                addVoteHistory(`投票给: ${candidates[candidateIndex].name}`);
+                
+                // 添加视觉反馈
+                const candidateItem = document.querySelector(`.candidate-item[data-id="${id}"]`);
+                if (candidateItem) {
+                    candidateItem.style.backgroundColor = '#e9f7ef';
+                    setTimeout(() => {
+                        candidateItem.style.backgroundColor = '';
+                    }, 300);
+                }
+            }
+        }
+        
+        // 减少候选人票数
+        function removeVoteFromCandidate(id) {
+            const candidateIndex = candidates.findIndex(c => c.id === id);
+            
+            if (candidateIndex !== -1 && candidates[candidateIndex].votes > 0) {
+                candidates[candidateIndex].votes -= 1;
+                saveToLocalStorage();
+                updateResults();
+                
+                // 记录投票历史
+                addVoteHistory(`从 ${candidates[candidateIndex].name} 减少一票`);
+                
+                // 添加视觉反馈
+                const candidateItem = document.querySelector(`.candidate-item[data-id="${id}"]`);
+                if (candidateItem) {
+                    candidateItem.style.backgroundColor = '#fee2e2';
+                    setTimeout(() => {
+                        candidateItem.style.backgroundColor = '';
+                    }, 300);
+                }
+            }
+        }
+        
+        // 更新投票结果和排名
+        function updateResults() {
+            // 按票数排序
+            sortedCandidatesGlobal = [...candidates].sort((a, b) => b.votes - a.votes);
+            
+            // 计算总票数
+            totalVotesGlobal = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+            
+            // 应用结果筛选
+            const searchFilter = searchResults.value.toLowerCase();
+            let displayCandidates = sortedCandidatesGlobal;
+            
+            if (searchFilter) {
+                displayCandidates = displayCandidates.filter(candidate => 
+                    candidate.name.toLowerCase().includes(searchFilter) ||
+                    (candidate.dept && candidate.dept.toLowerCase().includes(searchFilter))
+                );
+            }
+            
+            // 更新统计信息
+            totalCandidatesEl.textContent = candidates.length;
+            totalVotesEl.textContent = totalVotesGlobal;
+            
+            const leadingVotes = sortedCandidatesGlobal.length > 0 ? sortedCandidatesGlobal[0].votes : 0;
+            leadingVotesEl.textContent = leadingVotes;
+            
+            const avgVotes = candidates.length > 0 ? (totalVotesGlobal / candidates.length).toFixed(1) : 0;
+            avgVotesEl.textContent = avgVotes;
+            
+            // 假设有效投票数 = 总票数（这里可以根据需要调整）
+            validVotesEl.textContent = totalVotesGlobal;
+            
+            // 计算投票率（假设有30位教职工）
+            const participationRate = candidates.length > 0 ? Math.min(100, Math.round((totalVotesGlobal / (candidates.length * 3)) * 100)) : 0;
+            participationRateEl.textContent = `${participationRate}%`;
+            
+            // 更新结果表格
+            resultsBody.innerHTML = '';
+            
+            if (displayCandidates.length === 0) {
+                resultsBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fas fa-poll"></i>
+                                <p>${searchFilter ? '没有找到匹配的候选人' : '暂无投票数据'}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                updateVoteHistory();
+                return;
+            }
+            
+            displayCandidates.forEach((candidate, index) => {
+                // 查找原始排名（因为可能被筛选了）
+                const originalIndex = sortedCandidatesGlobal.findIndex(c => c.id === candidate.id);
+                const rank = originalIndex + 1;
+                
+                // 计算百分比
+                const percentage = totalVotesGlobal > 0 ? ((candidate.votes / totalVotesGlobal) * 100).toFixed(1) : 0;
+                
+                // 确定排名徽章样式
+                let rankClass = 'rank-other';
+                let rankText = rank;
+                
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+                
+                // 根据百分比确定条形图颜色
+                let percentageClass = 'percentage-0-10';
+                if (percentage >= 90) percentageClass = 'percentage-90-100';
+                else if (percentage >= 70) percentageClass = 'percentage-70-90';
+                else if (percentage >= 50) percentageClass = 'percentage-50-70';
+                else if (percentage >= 30) percentageClass = 'percentage-30-50';
+                else if (percentage >= 10) percentageClass = 'percentage-10-30';
+                
+                // 确定状态：只显示前8名为当选，其他不显示状态
+                let status = '';
+                if (rank <= 8) {
+                    status = `<span class="winner-badge">当选</span>`;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="rank-badge ${rankClass}">${rankText}</div>
+                    </td>
+                    <td>
+                        ${candidate.name}
+                        <div class="candidate-details">${candidate.dept}</div>
+                    </td>
+                    <td>
+                        <span class="votes-count">${candidate.votes}</span> 票
+                    </td>
+                    <td>
+                        <div class="percentage-bar-container">
+                            <div class="percentage-bar">
+                                <div class="percentage-fill ${percentageClass}" style="width: ${Math.min(100, percentage)}%">
+                                    <div class="percentage-number">${percentage}%</div>
+                                </div>
+                                <div class="percentage-text">${percentage}%</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${status}</td>
+                `;
+                
+                resultsBody.appendChild(row);
+            });
+            
+            // 更新投票历史
+            updateVoteHistory();
+            
+            // 更新投票分布图
+            updateDistributionChart(sortedCandidatesGlobal, totalVotesGlobal);
+        }
+        
+        // 更新投票历史
+        function updateVoteHistory() {
+            if (voteHistory.length === 0) {
+                voteHistoryEl.innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <i class="fas fa-history"></i>
+                        <p>暂无投票记录</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 只显示最近10条记录
+            const recentHistory = voteHistory.slice(-10).reverse();
+            
+            let historyHTML = '';
+            recentHistory.forEach(record => {
+                const time = new Date(record.time).toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                historyHTML += `
+                    <div class="history-item">
+                        <div class="history-action">${record.action}</div>
+                        <div class="history-time">${time}</div>
+                    </div>
+                `;
+            });
+            
+            voteHistoryEl.innerHTML = historyHTML;
+        }
+        
+        // 添加投票历史记录
+        function addVoteHistory(action) {
+            voteHistory.push({
+                action: action,
+                time: new Date().toISOString()
+            });
+            
+            // 只保留最近100条记录
+            if (voteHistory.length > 100) {
+                voteHistory = voteHistory.slice(-100);
+            }
+            
+            localStorage.setItem('voteHistory', JSON.stringify(voteHistory));
+            updateVoteHistory();
+        }
+        
+        // 更新投票分布图
+        function updateDistributionChart(sortedCandidates, totalVotes) {
+            const distributionChartEl = document.getElementById('distributionChart');
+            const emptyDistributionEl = document.getElementById('emptyDistribution');
+            
+            if (!distributionChartEl) return;
+            
+            if (sortedCandidates.length === 0) {
+                if (emptyDistributionEl) emptyDistributionEl.style.display = 'block';
+                return;
+            }
+            
+            if (emptyDistributionEl) emptyDistributionEl.style.display = 'none';
+            
+            // 创建分布图
+            let distributionHTML = '';
+            
+            // 只显示前10名，其他合并为"其他"
+            const displayCandidates = sortedCandidates.slice(0, 10);
+            const otherCandidates = sortedCandidates.slice(10);
+            
+            displayCandidates.forEach((candidate, index) => {
+                const percentage = totalVotes > 0 ? ((candidate.votes / totalVotes) * 100).toFixed(1) : 0;
+                
+                distributionHTML += `
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 14px;">${index + 1}. ${candidate.name}</span>
+                            <span style="font-size: 14px; font-weight: 600; color: #2c4d80;">${candidate.votes}票 (${percentage}%)</span>
+                        </div>
+                        <div style="height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                            <div style="height: 100%; width: ${percentage}%; background-color: #4a6fa5; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (otherCandidates.length > 0) {
+                const otherVotes = otherCandidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+                const otherPercentage = totalVotes > 0 ? ((otherVotes / totalVotes) * 100).toFixed(1) : 0;
+                
+                distributionHTML += `
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 14px;">其他 (${otherCandidates.length}人)</span>
+                            <span style="font-size: 14px; font-weight: 600; color: #2c4d80;">${otherVotes}票 (${otherPercentage}%)</span>
+                        </div>
+                        <div style="height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                            <div style="height: 100%; width: ${otherPercentage}%; background-color: #94a3b8; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            distributionChartEl.innerHTML = distributionHTML;
+        }
+        
+        // 重置所有票数
+        function resetAllVotes() {
+            if (candidates.length === 0) {
+                alert('当前没有候选人');
+                return;
+            }
+            
+            if (confirm('确定要重置所有候选人的票数吗？此操作不可撤销。')) {
+                candidates.forEach(candidate => {
+                    candidate.votes = 0;
+                });
+                
+                saveToLocalStorage();
+                updateResults();
+                addVoteHistory('重置所有票数');
+                alert('所有票数已重置为0');
+            }
+        }
+        
+        // 清空所有候选人
+        function clearAllCandidates() {
+            if (candidates.length === 0) {
+                alert('当前没有候选人');
+                return;
+            }
+            
+            if (confirm('确定要清空所有候选人吗？此操作将删除所有候选人数据，不可撤销。')) {
+                candidates = [];
+                saveToLocalStorage();
+                renderCandidates();
+                updateResults();
+                emptyList.style.display = 'block';
+                addVoteHistory('清空所有候选人');
+                alert('所有候选人已清空');
+            }
+        }
+        
+        // 导出Excel文件
+        function exportToExcel() {
+            if (candidates.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+            
+            // 按票数排序
+            const sortedCandidates = [...candidates].sort((a, b) => b.votes - a.votes);
+            const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+            
+            // 准备Excel数据
+            const excelData = [
+                ["外国语学院基础英语教研室、应用英语教研室2025年度教职工考核优秀评选投票结果"],
+                ["统计时间:", new Date().toLocaleString('zh-CN')],
+                ["候选人总数:", candidates.length, "总投票数:", totalVotes, "应选人数: 8人"],
+                ["备注: 排名前8位当选，不设候补人选"],
+                [""],
+                ["排名", "候选人姓名", "所属教研室", "得票数", "得票比例", "状态"]
+            ];
+            
+            sortedCandidates.forEach((candidate, index) => {
+                const percentage = totalVotes > 0 ? ((candidate.votes / totalVotes) * 100).toFixed(2) : 0;
+                let status = "";
+                if (index < 8) status = "当选";
+                
+                excelData.push([
+                    index + 1,
+                    candidate.name,
+                    candidate.dept,
+                    candidate.votes,
+                    `${percentage}%`,
+                    status
+                ]);
+            });
+            
+            // 添加摘要信息
+            excelData.push([""]);
+            excelData.push(["数据摘要"]);
+            excelData.push(["领先候选人:", sortedCandidates.length > 0 ? sortedCandidates[0].name : "无"]);
+            excelData.push(["最高票数:", sortedCandidates.length > 0 ? sortedCandidates[0].votes : 0]);
+            excelData.push(["平均票数:", (totalVotes / candidates.length).toFixed(2)]);
+            excelData.push(["统计时间:", new Date().toLocaleString('zh-CN')]);
+            
+            // 创建工作簿和工作表
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "投票结果");
+            
+            // 设置列宽
+            const wscols = [
+                { wch: 8 },   // 排名
+                { wch: 15 },  // 姓名
+                { wch: 20 },  // 教研室
+                { wch: 10 },  // 票数
+                { wch: 12 },  // 比例
+                { wch: 10 }   // 状态
+            ];
+            ws['!cols'] = wscols;
+            
+            // 生成文件名
+            const fileName = `外国语学院2025年度教职工考核优秀评选投票结果_${new Date().toISOString().slice(0,10)}.xlsx`;
+            
+            // 导出Excel文件
+            XLSX.writeFile(wb, fileName);
+            
+            // 更新导出时间
+            settings.lastExport = new Date().toISOString();
+            localStorage.setItem('voteSettings', JSON.stringify(settings));
+            updateExportInfo();
+            
+            addVoteHistory('导出Excel文件');
+            alert(`Excel文件已导出：${fileName}`);
+        }
+        
+        // 导出文本摘要
+        function exportToSummary() {
+            if (candidates.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+            
+            // 按票数排序
+            const sortedCandidates = [...candidates].sort((a, b) => b.votes - a.votes);
+            const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+            
+            let summaryText = "外国语学院2025年度教职工考核优秀评选投票结果\n";
+            summaryText += "============================================\n";
+            summaryText += `统计时间: ${new Date().toLocaleString('zh-CN')}\n`;
+            summaryText += `候选人总数: ${candidates.length}人\n`;
+            summaryText += `总投票数: ${totalVotes}票\n`;
+            summaryText += `应选人数: 8人\n`;
+            summaryText += "备注: 排名前8位当选，不设候补人选\n\n";
+            summaryText += "排名\t姓名\t\t教研室\t\t票数\t比例\t状态\n";
+            summaryText += "----\t----\t\t----\t\t----\t----\t----\n";
+            
+            sortedCandidates.forEach((candidate, index) => {
+                const percentage = totalVotes > 0 ? ((candidate.votes / totalVotes) * 100).toFixed(1) : 0;
+                let status = "";
+                if (index < 8) status = "当选";
+                
+                summaryText += `${index + 1}\t${candidate.name}\t\t${candidate.dept}\t\t${candidate.votes}\t${percentage}%\t${status}\n`;
+            });
+            
+            summaryText += "\n\n数据摘要:\n";
+            summaryText += `领先候选人: ${sortedCandidates.length > 0 ? sortedCandidates[0].name : "无"}\n`;
+            summaryText += `最高票数: ${sortedCandidates.length > 0 ? sortedCandidates[0].votes : 0}\n`;
+            summaryText += `平均票数: ${(totalVotes / candidates.length).toFixed(1)}\n`;
+            
+            // 创建Blob并下载
+            const blob = new Blob([summaryText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `投票结果摘要_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            addVoteHistory('导出文本摘要');
+            alert('文本摘要已导出');
+        }
+        
+        // 导出JSON数据
+        function exportToJSON() {
+            if (candidates.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+            
+            const dataStr = JSON.stringify({
+                candidates: candidates,
+                totalVotes: candidates.reduce((sum, candidate) => sum + candidate.votes, 0),
+                exportTime: new Date().toISOString(),
+                settings: settings
+            }, null, 2);
+            
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `投票数据_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            addVoteHistory('导出JSON数据');
+        }
+        
+        // 备份数据
+        function backupData() {
+            if (candidates.length === 0) {
+                alert('没有数据可备份');
+                return;
+            }
+            
+            const dataStr = JSON.stringify({
+                candidates: candidates,
+                voteHistory: voteHistory,
+                settings: settings,
+                backupTime: new Date().toISOString()
+            }, null, 2);
+            
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `投票系统备份_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            settings.lastBackup = new Date().toISOString();
+            localStorage.setItem('voteSettings', JSON.stringify(settings));
+            
+            addVoteHistory('备份数据');
+            alert('数据备份已导出');
+        }
+        
+        // 导入数据
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    // 检查文件类型
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        // 处理Excel文件
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const sheetData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                        
+                        // 解析Excel数据（假设第一行是标题）
+                        const importedCandidates = [];
+                        for (let i = 5; i < sheetData.length; i++) { // 从第6行开始（跳过标题）
+                            const row = sheetData[i];
+                            if (row && row.length >= 2 && row[1]) { // 至少要有姓名
+                                importedCandidates.push({
+                                    id: Date.now() + i,
+                                    name: String(row[1]),
+                                    dept: row[2] || '未指定',
+                                    votes: parseInt(row[3]) || 0,
+                                    addedDate: new Date().toISOString()
+                                });
+                            }
+                        }
+                        
+                        if (importedCandidates.length === 0) {
+                            throw new Error('Excel文件中没有找到有效数据');
+                        }
+                        
+                        if (confirm(`导入 ${importedCandidates.length} 个候选人数据将覆盖当前数据。确定要导入吗？`)) {
+                            candidates = importedCandidates;
+                            saveToLocalStorage();
+                            renderCandidates();
+                            updateResults();
+                            
+                            if (candidates.length > 0) {
+                                emptyList.style.display = 'none';
+                            }
+                            
+                            addVoteHistory(`导入Excel数据: ${importedCandidates.length}个候选人`);
+                            alert('Excel数据导入成功');
+                        }
+                    } else if (file.name.endsWith('.json')) {
+                        // 处理JSON文件
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        // 检查数据格式
+                        let candidatesToImport = [];
+                        let historyToImport = [];
+                        let settingsToImport = {};
+                        
+                        // 检查是否是完整备份文件
+                        if (importedData.candidates && Array.isArray(importedData.candidates)) {
+                            candidatesToImport = importedData.candidates;
+                            if (importedData.voteHistory && Array.isArray(importedData.voteHistory)) {
+                                historyToImport = importedData.voteHistory;
+                            }
+                            if (importedData.settings && typeof importedData.settings === 'object') {
+                                settingsToImport = importedData.settings;
+                            }
+                        } else if (Array.isArray(importedData)) {
+                            candidatesToImport = importedData;
+                        } else {
+                            throw new Error('数据格式不正确');
+                        }
+                        
+                        // 验证候选人数据
+                        for (const item of candidatesToImport) {
+                            if (!item.name || typeof item.votes !== 'number') {
+                                throw new Error('数据格式不正确');
+                            }
+                        }
+                        
+                        if (confirm(`导入 ${candidatesToImport.length} 个候选人数据将覆盖当前数据。确定要导入吗？`)) {
+                            candidates = candidatesToImport;
+                            // 确保每个候选人都有唯一的ID
+                            candidates.forEach(candidate => {
+                                if (!candidate.id) {
+                                    candidate.id = Date.now() + Math.floor(Math.random() * 1000);
+                                }
+                                if (!candidate.dept) {
+                                    candidate.dept = '未指定';
+                                }
+                            });
+                            
+                            // 如果导入的数据包含历史记录，则合并历史记录
+                            if (historyToImport.length > 0) {
+                                voteHistory = [...voteHistory, ...historyToImport].slice(-100);
+                                localStorage.setItem('voteHistory', JSON.stringify(voteHistory));
+                            }
+                            
+                            // 如果导入的数据包含设置，则更新设置
+                            if (Object.keys(settingsToImport).length > 0) {
+                                settings = { ...settings, ...settingsToImport };
+                                localStorage.setItem('voteSettings', JSON.stringify(settings));
+                            }
+                            
+                            saveToLocalStorage();
+                            renderCandidates();
+                            updateResults();
+                            
+                            if (candidates.length > 0) {
+                                emptyList.style.display = 'none';
+                            }
+                            
+                            addVoteHistory(`导入JSON数据: ${candidatesToImport.length}个候选人`);
+                            alert('JSON数据导入成功');
+                        }
+                    } else {
+                        alert('不支持的文件格式，请导入Excel或JSON文件');
+                    }
+                } catch (error) {
+                    alert('导入失败：文件格式不正确或内容错误');
+                    console.error(error);
+                }
+                
+                // 清空文件输入
+                importFileInput.value = '';
+            };
+            
+            if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                reader.readAsArrayBuffer(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+        
+        // 更新导出信息
+        function updateExportInfo() {
+            exportCandidatesEl.textContent = candidates.length;
+            exportVotesEl.textContent = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+            
+            if (settings.lastExport) {
+                const lastExportDate = new Date(settings.lastExport);
+                exportTimeEl.textContent = lastExportDate.toLocaleDateString('zh-CN');
+            } else {
+                exportTimeEl.textContent = '从未导出';
+            }
+        }
+        
+        // 更新系统信息
+        function updateSystemInfo() {
+            // 检查本地存储支持
+            if (typeof(Storage) !== "undefined") {
+                storageStatusEl.textContent = "本地存储 (支持)";
+            } else {
+                storageStatusEl.textContent = "不支持本地存储";
+            }
+            
+            // 更新最后更新时间
+            if (candidates.length > 0) {
+                const latestDate = new Date(Math.max(...candidates.map(c => new Date(c.addedDate).getTime())));
+                lastUpdateEl.textContent = latestDate.toLocaleDateString('zh-CN');
+            } else {
+                lastUpdateEl.textContent = "-";
+            }
+            
+            // 计算数据大小
+            const dataStr = JSON.stringify(candidates);
+            const dataSizeKB = (dataStr.length / 1024).toFixed(2);
+            dataSizeEl.textContent = `${dataSizeKB} KB`;
+        }
+        
+        // 保存数据到本地存储
+        function saveToLocalStorage() {
+            localStorage.setItem('voteCandidates', JSON.stringify(candidates));
+            updateExportInfo();
+            updateSystemInfo();
+        }
+        
+        // 添加示例数据（仅第一次使用时）
+        if (candidates.length === 0 && localStorage.getItem('firstRun') === null) {
+            // 添加示例候选人
+            const sampleCandidates = [
+                { id: 1, name: "张三", dept: "基础英语教研室", votes: 15, addedDate: new Date().toISOString() },
+                { id: 2, name: "李四", dept: "基础英语教研室", votes: 23, addedDate: new Date().toISOString() },
+                { id: 3, name: "王五", dept: "应用英语教研室", votes: 37, addedDate: new Date().toISOString() },
+                { id: 4, name: "赵六", dept: "应用英语教研室", votes: 12, addedDate: new Date().toISOString() },
+                { id: 5, name: "刘七", dept: "基础英语教研室", votes: 44, addedDate: new Date().toISOString() },
+                { id: 6, name: "陈八", dept: "应用英语教研室", votes: 18, addedDate: new Date().toISOString() },
+                { id: 7, name: "杨九", dept: "基础英语教研室", votes: 29, addedDate: new Date().toISOString() },
+                { id: 8, name: "周十", dept: "应用英语教研室", votes: 5, addedDate: new Date().toISOString() },
+                { id: 9, name: "吴十一", dept: "基础英语教研室", votes: 31, addedDate: new Date().toISOString() },
+                { id: 10, name: "郑十二", dept: "应用英语教研室", votes: 26, addedDate: new Date().toISOString() },
+                { id: 11, name: "孙十三", dept: "基础英语教研室", votes: 19, addedDate: new Date().toISOString() },
+                { id: 12, name: "钱十四", dept: "应用英语教研室", votes: 8, addedDate: new Date().toISOString() }
+            ];
+            
+            candidates = sampleCandidates;
+            saveToLocalStorage();
+            renderCandidates();
+            updateResults();
+            emptyList.style.display = 'none';
+            
+            // 添加示例投票记录
+            addVoteHistory("系统初始化: 添加示例数据");
+            addVoteHistory("投票给: 张三");
+            addVoteHistory("投票给: 李四");
+            addVoteHistory("投票给: 王五");
+            
+            // 标记已运行过
+            localStorage.setItem('firstRun', 'true');
+        }
+    </script>
+</body>
+</html>
